@@ -25,6 +25,10 @@ FastAPI backend for a Real Estate CRM full-stack application.
 - Lead source summary
 - Overdue task count
 - High priority task count
+- Basic role-based access control
+- Admin/manager can manage leads and tasks
+- Sales can access assigned leads and tasks
+- Viewer can access dashboard only
 
 ## Run Locally
 

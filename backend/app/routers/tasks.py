@@ -28,7 +28,7 @@ def get_tasks(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_all_tasks(db)
+    return get_all_tasks(db, current_user)
 
 
 @router.post(
@@ -41,7 +41,7 @@ def create_task_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return create_task(payload, db)
+    return create_task(payload, db, current_user)
 
 
 @router.get(
@@ -53,7 +53,7 @@ def get_task_by_id(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_task_or_404(task_id, db)
+    return get_task_or_404(task_id, db, current_user)
 
 
 @router.put(
@@ -66,7 +66,7 @@ def update_task_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return update_task(task_id, payload, db)
+    return update_task(task_id, payload, db, current_user)
 
 
 @router.delete(
@@ -77,4 +77,4 @@ def delete_task_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return delete_task(task_id, db)
+    return delete_task(task_id, db, current_user)

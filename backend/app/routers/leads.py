@@ -28,7 +28,7 @@ def get_leads(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_all_leads(db)
+    return get_all_leads(db, current_user)
 
 
 @router.post(
@@ -41,7 +41,7 @@ def create_lead_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return create_lead(payload, db)
+    return create_lead(payload, db, current_user)
 
 
 @router.get(
@@ -53,7 +53,7 @@ def get_lead_by_id(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_lead_or_404(lead_id, db)
+    return get_lead_or_404(lead_id, db, current_user)
 
 
 @router.put(
@@ -66,7 +66,7 @@ def update_lead_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return update_lead(lead_id, payload, db)
+    return update_lead(lead_id, payload, db, current_user)
 
 
 @router.delete(
@@ -77,4 +77,4 @@ def delete_lead_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return delete_lead(lead_id, db)
+    return delete_lead(lead_id, db, current_user)
