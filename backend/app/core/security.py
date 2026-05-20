@@ -3,7 +3,7 @@ from typing import Any
 
 from jose import JWTError, jwt
 from pwdlib import PasswordHash
-
+from pwdlib.exceptions import UnknownHashError
 from app.core.config import settings
 
 
@@ -15,7 +15,10 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return password_hash.verify(hashed_password, plain_password)
+    try:
+        return password_hash.verify(plain_password, hashed_password)
+    except UnknownHashError:
+        return False
 
 
 def create_access_token(
