@@ -105,3 +105,20 @@ backend/
   README.md
   requirements.txt
   .env
+
+## Seed Data
+
+Run seed script:
+
+```bash
+python scripts/seed.py
+If import fails:
+
+PYTHONPATH=. python scripts/seed.py
+
+Sample accounts:
+
+manager@example.com / password123
+sales1@example.com / password123
+sales2@example.com / password123
+viewer@example.com / password123
