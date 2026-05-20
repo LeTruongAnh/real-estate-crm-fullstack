@@ -20,6 +20,7 @@ class User(Base):
 
     assigned_leads = relationship("Lead", back_populates="assigned_user")
     assigned_tasks = relationship("Task", back_populates="assignee")
+    notes = relationship("Note", back_populates="user")
 
 
 class Lead(Base):
@@ -39,6 +40,7 @@ class Lead(Base):
 
     assigned_user = relationship("User", back_populates="assigned_leads")
     tasks = relationship("Task", back_populates="lead", cascade="all, delete-orphan")
+    notes = relationship("Note", back_populates="lead", cascade="all, delete-orphan")
 
 
 class Task(Base):
@@ -57,3 +59,16 @@ class Task(Base):
 
     lead = relationship("Lead", back_populates="tasks")
     assignee = relationship("User", back_populates="assigned_tasks")
+
+
+class Note(Base):
+    __tablename__ = "notes"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    lead_id = Column(String, ForeignKey("leads.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    lead = relationship("Lead", back_populates="notes")
+    user = relationship("User", back_populates="notes")

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 from app.db.database import Base, engine, test_database_connection
 from app.db import models
-from app.routers import auth, leads, tasks
+from app.routers import auth, leads, tasks, notes
 
 Base.metadata.create_all(bind=engine)
 
@@ -16,6 +16,7 @@ app = FastAPI(
 app.include_router(auth.router)
 app.include_router(leads.router)
 app.include_router(tasks.router)
+app.include_router(notes.router)
 
 @app.get("/")
 def root():
