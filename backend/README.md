@@ -29,6 +29,10 @@ FastAPI backend for a Real Estate CRM full-stack application.
 - Admin/manager can manage leads and tasks
 - Sales can access assigned leads and tasks
 - Viewer can access dashboard only
+- Input validation for lead, task, and note data
+- Phone number normalization
+- Duplicate phone validation
+- Standardized error helpers
 
 ## Run Locally
 

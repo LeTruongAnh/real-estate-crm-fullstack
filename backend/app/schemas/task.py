@@ -10,8 +10,8 @@ TaskPriority = Literal["low", "medium", "high"]
 
 class TaskCreate(BaseModel):
     lead_id: str | None = None
-    title: str = Field(..., min_length=2)
-    description: str | None = None
+    title: str = Field(..., min_length=2, max_length=150)
+    description: str | None = Field(default=None, max_length=1000)
     assignee_id: str
     status: TaskStatus = "todo"
     priority: TaskPriority = "medium"
@@ -20,8 +20,8 @@ class TaskCreate(BaseModel):
 
 class TaskUpdate(BaseModel):
     lead_id: str | None = None
-    title: str | None = Field(default=None, min_length=2)
-    description: str | None = None
+    title: str | None = Field(default=None, min_length=2, max_length=150)
+    description: str | None = Field(default=None, max_length=1000)
     assignee_id: str | None = None
     status: TaskStatus | None = None
     priority: TaskPriority | None = None

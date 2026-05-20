@@ -1,9 +1,9 @@
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.errors import bad_request_error, forbidden_error, not_found_error
+from app.core.permissions import is_admin_or_manager, is_sales, require_roles
 from app.db.models import Lead, User
 from app.schemas.lead import LeadCreate, LeadUpdate
-from app.core.permissions import is_admin_or_manager, is_sales, require_roles
 
 
 def get_all_leads(db: Session, current_user: User):
@@ -21,25 +21,16 @@ def get_all_leads(db: Session, current_user: User):
         )
 
     if current_user.role == "viewer":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Viewers cannot access leads",
-        )
+        forbidden_error("Viewers cannot access leads")
 
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="You do not have permission to access leads",
-    )
+    forbidden_error("You do not have permission to access leads")
 
 
 def get_lead_or_404(lead_id: str, db: Session, current_user: User | None = None):
     lead = db.query(Lead).filter(Lead.id == lead_id).first()
 
     if not lead:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Lead not found",
-        )
+        not_found_error("Lead")
 
     if current_user:
         if is_admin_or_manager(current_user):
@@ -48,10 +39,7 @@ def get_lead_or_404(lead_id: str, db: Session, current_user: User | None = None)
         if is_sales(current_user) and lead.assigned_to == current_user.id:
             return lead
 
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to access this lead",
-        )
+        forbidden_error("You do not have permission to access this lead")
 
     return lead
 
@@ -63,21 +51,16 @@ def validate_assigned_user(assigned_to: str | None, db: Session):
     assigned_user = db.query(User).filter(User.id == assigned_to).first()
 
     if not assigned_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Assigned user not found",
-        )
+        bad_request_error("Assigned user not found")
 
 
 def create_lead(payload: LeadCreate, db: Session, current_user: User):
     require_roles(current_user, ["admin", "manager"])
+
     existing_lead = db.query(Lead).filter(Lead.phone == payload.phone).first()
 
     if existing_lead:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Lead with this phone already exists",
-        )
+        bad_request_error("Lead with this phone already exists")
 
     validate_assigned_user(payload.assigned_to, db)
 
@@ -105,10 +88,7 @@ def update_lead(lead_id: str, payload: LeadUpdate, db: Session, current_user: Us
     update_data = payload.model_dump(exclude_unset=True)
 
     if is_sales(current_user) and "assigned_to" in update_data:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Sales users cannot reassign leads",
-        )
+        forbidden_error("Sales users cannot reassign leads")
 
     if "phone" in update_data:
         existing_lead = (
@@ -118,10 +98,7 @@ def update_lead(lead_id: str, payload: LeadUpdate, db: Session, current_user: Us
         )
 
         if existing_lead:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Lead with this phone already exists",
-            )
+            bad_request_error("Lead with this phone already exists")
 
     if "assigned_to" in update_data:
         validate_assigned_user(update_data["assigned_to"], db)

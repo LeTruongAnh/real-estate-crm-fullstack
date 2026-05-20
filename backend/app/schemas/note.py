@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class NoteCreate(BaseModel):
-    content: str = Field(..., min_length=2)
+    content: str = Field(..., min_length=1, max_length=2000)
 
 
 class NoteResponse(BaseModel):
