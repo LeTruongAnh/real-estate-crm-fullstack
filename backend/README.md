@@ -20,6 +20,11 @@ FastAPI backend for a Real Estate CRM full-stack application.
 - Current user API
 - Lead CRUD API
 - Duplicate phone validation
+- Dashboard summary API
+- Lead status summary
+- Lead source summary
+- Overdue task count
+- High priority task count
 
 ## Run Locally
 
@@ -62,6 +67,8 @@ POST   /leads
 GET    /leads/{lead_id}
 PUT    /leads/{lead_id}
 DELETE /leads/{lead_id}
+
+GET /dashboard/summary
 
 ---
 
