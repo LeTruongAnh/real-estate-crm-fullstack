@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, String
+from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 
 from app.db.database import Base
@@ -19,6 +19,7 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     assigned_leads = relationship("Lead", back_populates="assigned_user")
+    assigned_tasks = relationship("Task", back_populates="assignee")
 
 
 class Lead(Base):
@@ -37,3 +38,22 @@ class Lead(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     assigned_user = relationship("User", back_populates="assigned_leads")
+    tasks = relationship("Task", back_populates="lead", cascade="all, delete-orphan")
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    lead_id = Column(String, ForeignKey("leads.id"), nullable=True)
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    assignee_id = Column(String, ForeignKey("users.id"), nullable=False)
+    status = Column(String, nullable=False, default="todo")
+    priority = Column(String, nullable=False, default="medium")
+    deadline = Column(Date, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    lead = relationship("Lead", back_populates="tasks")
+    assignee = relationship("User", back_populates="assigned_tasks")
