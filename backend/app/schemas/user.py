@@ -14,6 +14,11 @@ class UserCreate(BaseModel):
     role: UserRole = "sales"
 
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=1)
+
+
 class UserResponse(BaseModel):
     id: str
     name: str
@@ -23,3 +28,9 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
