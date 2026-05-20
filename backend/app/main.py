@@ -1,12 +1,19 @@
 from fastapi import FastAPI
 
-from app.db.database import test_database_connection
+from app.db.database import Base, engine, test_database_connection
+from app.db import models
+from app.routers import auth
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Real Estate CRM API",
     description="Backend API for Real Estate CRM Full-stack App",
     version="1.0.0",
 )
+
+
+app.include_router(auth.router)
 
 
 @app.get("/")
