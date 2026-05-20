@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from app.db.database import test_database_connection
+
 app = FastAPI(
     title="Real Estate CRM API",
     description="Backend API for Real Estate CRM Full-stack App",
@@ -18,4 +20,14 @@ def root():
 def health_check():
     return {
         "status": "ok"
+    }
+
+
+@app.get("/db-health")
+def db_health_check():
+    result = test_database_connection()
+
+    return {
+        "database": "connected",
+        "result": result
     }
