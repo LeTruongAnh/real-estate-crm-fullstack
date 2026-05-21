@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 import { clearAuthSession, getAuthToken } from "@/lib/api";
 
@@ -30,6 +30,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const token = getAuthToken();
@@ -84,7 +85,10 @@ export function AppLayout({ children }: AppLayoutProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                className={`block rounded-lg px-3 py-2 text-sm font-medium ${pathname.startsWith(item.href)
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                  }`}
               >
                 {item.label}
               </Link>
