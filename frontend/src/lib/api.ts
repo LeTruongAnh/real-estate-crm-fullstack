@@ -28,15 +28,25 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-  return handleResponse<LoginResponse>(response);
+    return handleResponse<LoginResponse>(response);
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error(
+        "Cannot connect to backend server. Please make sure FastAPI is running.",
+      );
+    }
+
+    throw error;
+  }
 }
 
 export function getAuthToken(): string | null {
@@ -63,16 +73,26 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const token = getAuthToken();
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    });
 
-  return handleResponse<T>(response);
+    return handleResponse<T>(response);
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error(
+        "Cannot connect to backend server. Please make sure FastAPI is running.",
+      );
+    }
+
+    throw error;
+  }
 }
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {

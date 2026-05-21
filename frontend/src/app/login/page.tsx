@@ -31,7 +31,11 @@ export default function LoginPage() {
       const message =
         err instanceof Error ? err.message : "Unable to sign in";
 
-      setError(message);
+      if (message === "Failed to fetch") {
+        setError("Cannot connect to backend server. Please make sure FastAPI is running.");
+      } else {
+        setError(message);
+      }
     } finally {
       setIsLoading(false);
     }
