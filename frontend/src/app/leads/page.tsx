@@ -115,6 +115,10 @@ export default function LeadsPage() {
   }
 
   useEffect(() => {
+    loadLeads();
+  }, []);
+
+  useEffect(() => {
     const currentUser = getCurrentUserFromStorage();
 
     if (currentUser?.role === "admin" || currentUser?.role === "manager") {
