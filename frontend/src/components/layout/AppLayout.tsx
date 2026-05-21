@@ -1,4 +1,10 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { clearAuthSession, getAuthToken } from "@/lib/api";
 
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -20,6 +26,46 @@ const navItems = [
 ];
 
 export function AppLayout({ children }: AppLayoutProps) {
+  const router = useRouter();
+
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = getAuthToken();
+
+    if (!token) {
+      setIsAuthenticated(false);
+      setIsCheckingAuth(false);
+      router.replace("/login");
+      return;
+    }
+
+    setIsAuthenticated(true);
+    setIsCheckingAuth(false);
+  }, [router]);
+
+  function handleLogout() {
+    clearAuthSession();
+    router.replace("/login");
+  }
+
+  if (isCheckingAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-100">
+        <div className="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
+          <p className="text-sm font-medium text-slate-700">
+            Checking session...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-slate-100">
       <div className="flex min-h-screen">
@@ -47,13 +93,21 @@ export function AppLayout({ children }: AppLayoutProps) {
         </aside>
 
         <main className="flex-1">
-          <header className="border-b border-slate-200 bg-white px-6 py-4">
+          <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
             <div>
               <p className="text-sm text-slate-500">CRM Workspace</p>
               <h2 className="text-lg font-semibold text-slate-900">
                 Real Estate Sales Management
               </h2>
             </div>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            >
+              Logout
+            </button>
           </header>
 
           <div className="p-6">{children}</div>
