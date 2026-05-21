@@ -22,4 +22,4 @@ def get_summary(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_dashboard_summary(db)
+    return get_dashboard_summary(db, current_user)
