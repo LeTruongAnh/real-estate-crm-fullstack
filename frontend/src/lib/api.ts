@@ -10,6 +10,17 @@ type ApiErrorResponse = {
   detail?: string;
 };
 
+type LeadPayload = {
+  name: string;
+  phone: string;
+  email?: string | null;
+  source: string;
+  interest: string;
+  budget?: number | null;
+  status: string;
+  assigned_to?: string | null;
+};
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     let errorMessage = "Something went wrong";
@@ -105,4 +116,21 @@ export async function getLeads(): Promise<Lead[]> {
 
 export async function getTasks(): Promise<Task[]> {
   return apiFetch<Task[]>("/tasks");
+}
+
+export async function createLead(payload: LeadPayload): Promise<Lead> {
+  return apiFetch<Lead>("/leads", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateLead(
+  leadId: string,
+  payload: Partial<LeadPayload>,
+): Promise<Lead> {
+  return apiFetch<Lead>(`/leads/${leadId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 }

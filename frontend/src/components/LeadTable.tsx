@@ -4,9 +4,10 @@ import { LeadStatusBadge } from "@/components/ui/LeadStatusBadge";
 
 type LeadTableProps = {
   leads: Lead[];
+  onEditLead?: (lead: Lead) => void;
 };
 
-export function LeadTable({ leads }: LeadTableProps) {
+export function LeadTable({ leads, onEditLead }: LeadTableProps) {
   if (leads.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
@@ -41,6 +42,9 @@ export function LeadTable({ leads }: LeadTableProps) {
               </th>
               <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Budget
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Action
               </th>
             </tr>
           </thead>
@@ -77,6 +81,16 @@ export function LeadTable({ leads }: LeadTableProps) {
 
                 <td className="px-4 py-4 text-right text-sm font-medium text-slate-900">
                   {formatBudget(lead.budget)}
+                </td>
+
+                <td className="px-4 py-4 text-right">
+                  <button
+                    type="button"
+                    onClick={() => onEditLead?.(lead)}
+                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                  >
+                    Edit
+                  </button>
                 </td>
               </tr>
             ))}

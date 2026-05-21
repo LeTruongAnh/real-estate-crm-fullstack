@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { LeadTable } from "@/components/LeadTable";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { getLeads } from "@/lib/api";
+import { LeadForm, type LeadFormValues } from "@/components/LeadForm";
+import { createLead, getLeads, updateLead } from "@/lib/api";
 import type { Lead, LeadSource, LeadStatus } from "@/types";
 
 const statusOptions: { label: string; value: LeadStatus | "all" }[] = [
@@ -28,28 +29,84 @@ const sourceOptions: { label: string; value: LeadSource | "all" }[] = [
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<LeadStatus | "all">("all");
   const [sourceFilter, setSourceFilter] = useState<LeadSource | "all">("all");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    async function loadLeads() {
-      try {
-        setIsLoading(true);
-        setError("");
+  async function loadLeads() {
+    try {
+      setIsLoading(true);
+      setError("");
 
-        const data = await getLeads();
-        setLeads(data);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Unable to load leads";
-        setError(message);
-      } finally {
-        setIsLoading(false);
-      }
+      const data = await getLeads();
+      setLeads(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unable to load leads";
+      setError(message);
+    } finally {
+      setIsLoading(false);
     }
+  }
 
+  function handleOpenCreateForm() {
+    setEditingLead(null);
+    setFormError("");
+    setIsFormOpen(true);
+  }
+
+  function handleOpenEditForm(lead: Lead) {
+    setEditingLead(lead);
+    setFormError("");
+    setIsFormOpen(true);
+  }
+
+  function handleCloseForm() {
+    setIsFormOpen(false);
+    setEditingLead(null);
+    setFormError("");
+  }
+
+  async function handleSubmitLead(values: LeadFormValues) {
+    try {
+      setIsSubmitting(true);
+      setFormError("");
+
+      const payload = {
+        name: values.name,
+        phone: values.phone,
+        email: values.email.trim() ? values.email.trim() : null,
+        source: values.source,
+        interest: values.interest,
+        budget: values.budget ? Number(values.budget) : null,
+        status: values.status,
+        assigned_to: editingLead?.assigned_to || null,
+      };
+
+      if (editingLead) {
+        await updateLead(editingLead.id, payload);
+      } else {
+        await createLead(payload);
+      }
+
+      await loadLeads();
+      handleCloseForm();
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Unable to save lead";
+
+      setFormError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  useEffect(() => {
     loadLeads();
   }, []);
 
@@ -84,18 +141,36 @@ export default function LeadsPage() {
             </p>
           </div>
 
-          <div className="rounded-xl bg-white px-4 py-3 text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">
-            Showing{" "}
-            <span className="font-semibold text-slate-900">
-              {filteredLeads.length}
-            </span>{" "}
-            of{" "}
-            <span className="font-semibold text-slate-900">
-              {leads.length}
-            </span>{" "}
-            leads
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="rounded-xl bg-white px-4 py-3 text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">
+              Showing{" "}
+              <span className="font-semibold text-slate-900">
+                {filteredLeads.length}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-slate-900">{leads.length}</span>{" "}
+              leads
+            </div>
+
+            <button
+              type="button"
+              onClick={handleOpenCreateForm}
+              className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+            >
+              Create Lead
+            </button>
           </div>
         </div>
+
+        {isFormOpen ? (
+          <LeadForm
+            initialLead={editingLead}
+            isSubmitting={isSubmitting}
+            error={formError}
+            onCancel={handleCloseForm}
+            onSubmit={handleSubmitLead}
+          />
+        ) : null}
 
         <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-3">
           <div>
@@ -167,7 +242,7 @@ export default function LeadsPage() {
         ) : error ? (
           <LeadsErrorState message={error} />
         ) : (
-          <LeadTable leads={filteredLeads} />
+          <LeadTable leads={filteredLeads} onEditLead={handleOpenEditForm} />
         )}
       </div>
     </AppLayout>
