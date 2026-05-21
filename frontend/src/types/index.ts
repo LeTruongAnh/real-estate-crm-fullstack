@@ -74,3 +74,11 @@ export type LoginResponse = {
   token_type: "bearer";
   user: User;
 };
+
+export type Note = {
+  id: string;
+  lead_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+};

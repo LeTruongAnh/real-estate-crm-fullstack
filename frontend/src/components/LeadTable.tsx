@@ -1,6 +1,7 @@
 import type { Lead } from "@/types";
 import { LeadSourceBadge } from "@/components/ui/LeadSourceBadge";
 import { LeadStatusBadge } from "@/components/ui/LeadStatusBadge";
+import Link from "next/link";
 
 type LeadTableProps = {
   leads: Lead[];
@@ -54,9 +55,12 @@ export function LeadTable({ leads, onEditLead }: LeadTableProps) {
               <tr key={lead.id} className="hover:bg-slate-50">
                 <td className="px-4 py-4">
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">
+                    <Link
+                      href={`/leads/${lead.id}`}
+                      className="text-sm font-semibold text-slate-900 hover:underline"
+                    >
                       {lead.name}
-                    </p>
+                    </Link>
                     <p className="mt-1 text-xs text-slate-500">
                       {lead.email || "No email"}
                     </p>

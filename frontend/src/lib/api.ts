@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "@/lib/config";
-import type { DashboardSummary, Lead, LoginResponse, Task } from "@/types";
+import type { DashboardSummary, Lead, LoginResponse, Note, Task } from "@/types";
 
 type LoginPayload = {
   email: string;
@@ -131,6 +131,43 @@ export async function updateLead(
 ): Promise<Lead> {
   return apiFetch<Lead>(`/leads/${leadId}`, {
     method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getLeadById(leadId: string): Promise<Lead> {
+  return apiFetch<Lead>(`/leads/${leadId}`);
+}
+
+export async function getLeadNotes(leadId: string): Promise<Note[]> {
+  return apiFetch<Note[]>(`/leads/${leadId}/notes`);
+}
+
+export async function createLeadNote(
+  leadId: string,
+  content: string,
+): Promise<Note> {
+  return apiFetch<Note>(`/leads/${leadId}/notes`, {
+    method: "POST",
+    body: JSON.stringify({
+      content,
+    }),
+  });
+}
+
+type TaskPayload = {
+  lead_id?: string | null;
+  title: string;
+  description?: string | null;
+  assignee_id: string;
+  status: string;
+  priority: string;
+  deadline?: string | null;
+};
+
+export async function createTask(payload: TaskPayload): Promise<Task> {
+  return apiFetch<Task>("/tasks", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
 }
