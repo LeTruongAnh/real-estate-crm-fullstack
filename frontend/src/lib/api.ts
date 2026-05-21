@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "@/lib/config";
-import type { DashboardSummary, Lead, LoginResponse, Note, Task } from "@/types";
+import type { DashboardSummary, Lead, LoginResponse, Note, Task, User } from "@/types";
 
 type LoginPayload = {
   email: string;
@@ -170,4 +170,26 @@ export async function createTask(payload: TaskPayload): Promise<Task> {
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export function getCurrentUserFromStorage(): User | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const rawUser = localStorage.getItem("current_user");
+
+  if (!rawUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawUser) as User;
+  } catch {
+    return null;
+  }
+}
+
+export async function getSalesUsers(): Promise<User[]> {
+  return apiFetch<User[]>("/users/sales");
 }

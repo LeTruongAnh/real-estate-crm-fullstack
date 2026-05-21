@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 
-import { clearAuthSession, getAuthToken } from "@/lib/api";
+import { clearAuthSession, getAuthToken, getCurrentUserFromStorage } from "@/lib/api";
 
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -14,14 +14,17 @@ const navItems = [
   {
     label: "Dashboard",
     href: "/dashboard",
+    roles: ["admin", "manager", "sales", "viewer"],
   },
   {
     label: "Leads",
     href: "/leads",
+    roles: ["admin", "manager", "sales"],
   },
   {
     label: "Tasks",
     href: "/tasks",
+    roles: ["admin", "manager", "sales"],
   },
 ];
 
@@ -31,6 +34,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const pathname = usePathname();
+  const currentUser = getCurrentUserFromStorage();
 
   useEffect(() => {
     const token = getAuthToken();
@@ -81,18 +85,20 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
 
           <nav className="space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`block rounded-lg px-3 py-2 text-sm font-medium ${pathname.startsWith(item.href)
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
-                  }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems
+              .filter((item) => currentUser && item.roles.includes(currentUser.role))
+              .map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`block rounded-lg px-3 py-2 text-sm font-medium ${pathname.startsWith(item.href)
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                    }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
           </nav>
         </aside>
 

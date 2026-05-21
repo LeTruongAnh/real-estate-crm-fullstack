@@ -88,13 +88,15 @@ export function LeadTable({ leads, onEditLead }: LeadTableProps) {
                 </td>
 
                 <td className="px-4 py-4 text-right">
-                  <button
-                    type="button"
-                    onClick={() => onEditLead?.(lead)}
-                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-                  >
-                    Edit
-                  </button>
+                  {onEditLead ? (
+                    <button
+                      type="button"
+                      onClick={() => onEditLead(lead)}
+                      className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                    >
+                      Edit
+                    </button>
+                  ) : null}
                 </td>
               </tr>
             ))}

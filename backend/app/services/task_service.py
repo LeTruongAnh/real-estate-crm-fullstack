@@ -65,10 +65,29 @@ def validate_assignee_exists(assignee_id: str | None, db: Session):
 
 
 def create_task(payload: TaskCreate, db: Session, current_user: User):
-    require_roles(current_user, ["admin", "manager"])
-
     validate_lead_exists(payload.lead_id, db)
     validate_assignee_exists(payload.assignee_id, db)
+
+    if is_admin_or_manager(current_user):
+        pass
+
+    elif is_sales(current_user):
+        if payload.assignee_id != current_user.id:
+            forbidden_error("Sales users can only assign tasks to themselves")
+
+        if not payload.lead_id:
+            forbidden_error("Sales users can only create tasks for assigned leads")
+
+        lead = db.query(Lead).filter(Lead.id == payload.lead_id).first()
+
+        if not lead:
+            bad_request_error("Lead not found")
+
+        if lead.assigned_to != current_user.id:
+            forbidden_error("Sales users can only create tasks for their own leads")
+
+    else:
+        forbidden_error("You do not have permission to create tasks")
 
     task = Task(
         lead_id=payload.lead_id,

@@ -5,8 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { LeadTable } from "@/components/LeadTable";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { LeadForm, type LeadFormValues } from "@/components/LeadForm";
-import { createLead, getLeads, updateLead } from "@/lib/api";
-import type { Lead, LeadSource, LeadStatus } from "@/types";
+import { createLead, getLeads, updateLead, getCurrentUserFromStorage, getSalesUsers } from "@/lib/api";
+import type { Lead, LeadSource, LeadStatus, User } from "@/types";
 
 const statusOptions: { label: string; value: LeadStatus | "all" }[] = [
   { label: "All statuses", value: "all" },
@@ -38,6 +38,14 @@ export default function LeadsPage() {
   const [sourceFilter, setSourceFilter] = useState<LeadSource | "all">("all");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const currentUser = getCurrentUserFromStorage();
+  const canCreateLead =
+    currentUser?.role === "admin" || currentUser?.role === "manager";
+  const canEditLead =
+    currentUser?.role === "admin" ||
+    currentUser?.role === "manager" ||
+    currentUser?.role === "sales";
+  const [salesUsers, setSalesUsers] = useState<User[]>([]);
 
   async function loadLeads() {
     try {
@@ -85,7 +93,7 @@ export default function LeadsPage() {
         interest: values.interest,
         budget: values.budget ? Number(values.budget) : null,
         status: values.status,
-        assigned_to: editingLead?.assigned_to || null,
+        assigned_to: values.assigned_to || null,
       };
 
       if (editingLead) {
@@ -107,7 +115,13 @@ export default function LeadsPage() {
   }
 
   useEffect(() => {
-    loadLeads();
+    const currentUser = getCurrentUserFromStorage();
+
+    if (currentUser?.role === "admin" || currentUser?.role === "manager") {
+      getSalesUsers()
+        .then(setSalesUsers)
+        .catch(() => setSalesUsers([]));
+    }
   }, []);
 
   const filteredLeads = useMemo(() => {
@@ -152,19 +166,22 @@ export default function LeadsPage() {
               leads
             </div>
 
-            <button
-              type="button"
-              onClick={handleOpenCreateForm}
-              className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800"
-            >
-              Create Lead
-            </button>
+            {canCreateLead ? (
+              <button
+                type="button"
+                onClick={handleOpenCreateForm}
+                className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Create Lead
+              </button>
+            ) : null}
           </div>
         </div>
 
         {isFormOpen ? (
           <LeadForm
             initialLead={editingLead}
+            salesUsers={salesUsers}
             isSubmitting={isSubmitting}
             error={formError}
             onCancel={handleCloseForm}
@@ -242,7 +259,10 @@ export default function LeadsPage() {
         ) : error ? (
           <LeadsErrorState message={error} />
         ) : (
-          <LeadTable leads={filteredLeads} onEditLead={handleOpenEditForm} />
+          <LeadTable
+            leads={filteredLeads}
+            onEditLead={canEditLead ? handleOpenEditForm : undefined}
+          />
         )}
       </div>
     </AppLayout>

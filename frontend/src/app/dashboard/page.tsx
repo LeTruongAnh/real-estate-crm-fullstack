@@ -4,13 +4,17 @@ import { useEffect, useState } from "react";
 
 import { AppLayout } from "@/components/layout/AppLayout";
 import { StatCard } from "@/components/ui/StatCard";
-import { getDashboardSummary } from "@/lib/api";
+import { getDashboardSummary, getCurrentUserFromStorage } from "@/lib/api";
 import type { DashboardSummary } from "@/types";
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const currentUser = getCurrentUserFromStorage();
+
+  const dashboardMode =
+    currentUser?.role === "sales" ? "Personal Dashboard" : "Global Dashboard";
 
   useEffect(() => {
     async function loadDashboardSummary() {
@@ -39,7 +43,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Overview of leads, tasks, and sales activity.
+            {dashboardMode} · Overview of leads, tasks, and sales activity.
           </p>
         </div>
 

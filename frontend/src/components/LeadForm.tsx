@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 
-import type { Lead, LeadSource, LeadStatus } from "@/types";
+import type { Lead, LeadSource, LeadStatus, User } from "@/types";
 
 type LeadFormValues = {
   name: string;
@@ -12,12 +12,14 @@ type LeadFormValues = {
   interest: string;
   budget: string;
   status: LeadStatus;
+  assigned_to: string;
 };
 
 type LeadFormProps = {
   initialLead?: Lead | null;
   isSubmitting: boolean;
   error: string;
+  salesUsers: User[];
   onCancel: () => void;
   onSubmit: (values: LeadFormValues) => Promise<void>;
 };
@@ -43,6 +45,7 @@ export function LeadForm({
   initialLead,
   isSubmitting,
   error,
+  salesUsers,
   onCancel,
   onSubmit,
 }: LeadFormProps) {
@@ -54,6 +57,7 @@ export function LeadForm({
     interest: initialLead?.interest || "",
     budget: initialLead?.budget ? String(initialLead.budget) : "",
     status: initialLead?.status || "new",
+    assigned_to: initialLead?.assigned_to || "",
   });
 
   function updateField<K extends keyof LeadFormValues>(
@@ -177,6 +181,24 @@ export function LeadForm({
             {statusOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            Assigned Sales
+          </label>
+          <select
+            value={values.assigned_to}
+            onChange={(event) => updateField("assigned_to", event.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-900"
+          >
+            <option value="">Unassigned</option>
+            {salesUsers.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name} · {user.email}
               </option>
             ))}
           </select>
